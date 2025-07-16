@@ -4,4 +4,5 @@ import com.yllielshani.twocentsdemo.data.model.ItemDto
 
 interface ApiService {
     suspend fun getItems(): List<ItemDto>
+    suspend fun getPostById(id: String): ItemDto
 }

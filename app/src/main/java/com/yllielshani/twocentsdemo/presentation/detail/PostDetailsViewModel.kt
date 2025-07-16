@@ -1,4 +1,4 @@
-package com.yllielshani.twocentsdemo.presentation.items
+package com.yllielshani.twocentsdemo.presentation.detail
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,26 +12,22 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+
 @HiltViewModel
-class HomeViewModel @Inject constructor(
+class PostDetailsViewModel @Inject constructor(
     private val repository: ItemRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<UiState<List<ItemDto>>>(UiState.Loading)
-    val uiState: StateFlow<UiState<List<ItemDto>>> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow<UiState<ItemDto>>(UiState.Loading)
+    val uiState: StateFlow<UiState<ItemDto>> = _uiState.asStateFlow()
 
-    init {
-        loadItems()
-    }
-
-
-    fun loadItems() {
+    fun loadPost(postId: String) {
         viewModelScope.launch {
             try {
-                val items = repository.fetchItems()
-                _uiState.value = if (items.isEmpty()) UiState.Empty else UiState.Success(items)
+                val post = repository.fetchItemById(postId)
+                _uiState.value = UiState.Success(post)
             } catch (e: Exception) {
-                _uiState.value = UiState.Error("Failed to load items")
+                _uiState.value = UiState.Error("Failed to load post")
             }
         }
     }

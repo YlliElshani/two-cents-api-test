@@ -12,4 +12,7 @@ class ItemRepositoryImpl @Inject constructor(
     override suspend fun fetchItems(): List<ItemDto> {
         return apiService.getItems()
     }
+    override suspend fun fetchItemById(id: String): ItemDto {
+        return apiService.getPostById(id)
+    }
 }

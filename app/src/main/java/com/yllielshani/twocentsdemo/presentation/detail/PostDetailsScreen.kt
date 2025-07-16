@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
-import com.yllielshani.twocentsdemo.data.model.ItemDto
+import com.yllielshani.twocentsdemo.data.model.PostDto
 import com.yllielshani.twocentsdemo.presentation.UiState
 
 @Composable
@@ -37,7 +37,7 @@ fun PostDetailsRoute(
 
 @Composable
 fun PostDetailsScreen(
-    uiState: UiState<ItemDto>,
+    uiState: UiState<PostDto>,
     onRetry: () -> Unit
 ) {
     when (uiState) {

@@ -29,14 +29,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.yllielshani.twocentsdemo.data.enums.Tier
-import com.yllielshani.twocentsdemo.data.model.ItemDto
+import com.yllielshani.twocentsdemo.data.model.PostDto
 import com.yllielshani.twocentsdemo.data.model.PosterInfo
 import com.yllielshani.twocentsdemo.utils.formatAmountWithDots
 
 @Composable
-fun ItemCard(
+fun PostCard(
     number: Int,
-    item: ItemDto,
+    item: PostDto,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -55,12 +55,12 @@ fun ItemCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconTextRow(tier = item.tier, label = item.posterInfo.assetCount)
-                NumberBadge(number = number)
+                UserAssets(number = number)
             }
             Spacer(Modifier.height(8.dp))
             Text(item.description, style = MaterialTheme.typography.bodyMedium, color = Color.White)
             Spacer(Modifier.height(8.dp))
-            PlaceholderComposable(poster = item.posterInfo)
+            UserInformation(poster = item.posterInfo)
         }
     }
 }
@@ -129,7 +129,7 @@ fun IconTextRow(
 }
 
 @Composable
-fun NumberBadge(
+fun UserAssets(
     number: Int,
     modifier: Modifier = Modifier
 ) {
@@ -145,7 +145,7 @@ fun NumberBadge(
 
 
 @Composable
-fun PlaceholderComposable(
+fun UserInformation(
     poster: PosterInfo,
     modifier: Modifier = Modifier
 ) {

@@ -10,7 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.yllielshani.twocentsdemo.data.model.ItemDto
+import com.yllielshani.twocentsdemo.data.model.PostDto
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.yllielshani.twocentsdemo.data.enums.Tier
@@ -20,7 +20,7 @@ import com.yllielshani.twocentsdemo.presentation.UiState
 
 @Composable
 fun HomeScreen(
-    uiState: UiState<List<ItemDto>>,
+    uiState: UiState<List<PostDto>>,
     onRetry: () -> Unit,
     onPostClick: (String) -> Unit
 ) {
@@ -56,7 +56,7 @@ fun HomeScreen(
                 )
             ) {
                 itemsIndexed(list) { index, item ->
-                    ItemCard(
+                    PostCard(
                         number = index + 1,
                         item = item,
                         onClick = { onPostClick(item.id) }
@@ -100,11 +100,11 @@ fun Preview_HomeScreen_Success() {
     HomeScreen(
         uiState = UiState.Success(
             listOf(
-                ItemDto(
+                PostDto(
                     "1", "A", "Alpha", Tier.Silver,
                     posterInfo = PosterInfo(age = 24, gender = "F", location = "Paris", 23423)
                 ),
-                ItemDto(
+                PostDto(
                     "2", "B", "Beta", Tier.Gold,
                     posterInfo = PosterInfo(age = 24, gender = "F", location = "Paris", 23423)
                 )

@@ -2,7 +2,7 @@ package com.yllielshani.twocentsdemo.presentation.detail
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.yllielshani.twocentsdemo.data.model.ItemDto
+import com.yllielshani.twocentsdemo.data.model.PostDto
 import com.yllielshani.twocentsdemo.data.repository.ItemRepository
 import com.yllielshani.twocentsdemo.presentation.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,8 +18,8 @@ class PostDetailsViewModel @Inject constructor(
     private val repository: ItemRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<UiState<ItemDto>>(UiState.Loading)
-    val uiState: StateFlow<UiState<ItemDto>> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow<UiState<PostDto>>(UiState.Loading)
+    val uiState: StateFlow<UiState<PostDto>> = _uiState.asStateFlow()
 
     fun loadPost(postId: String) {
         viewModelScope.launch {

@@ -2,7 +2,7 @@ package com.yllielshani.twocentsdemo.presentation.items
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.yllielshani.twocentsdemo.data.model.ItemDto
+import com.yllielshani.twocentsdemo.data.model.PostDto
 import com.yllielshani.twocentsdemo.data.repository.ItemRepository
 import com.yllielshani.twocentsdemo.presentation.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,8 +17,8 @@ class HomeViewModel @Inject constructor(
     private val repository: ItemRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<UiState<List<ItemDto>>>(UiState.Loading)
-    val uiState: StateFlow<UiState<List<ItemDto>>> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow<UiState<List<PostDto>>>(UiState.Loading)
+    val uiState: StateFlow<UiState<List<PostDto>>> = _uiState.asStateFlow()
 
     init {
         loadItems()

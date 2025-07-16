@@ -2,7 +2,7 @@ package com.yllielshani.twocentsdemo.data.model
 
 import com.yllielshani.twocentsdemo.data.enums.Tier
 
-data class ItemDto (
+data class PostDto (
     val id: String,
     val title: String,
     val description: String,

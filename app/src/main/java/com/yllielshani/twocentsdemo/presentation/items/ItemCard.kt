@@ -1,19 +1,37 @@
 package com.yllielshani.twocentsdemo.presentation.items
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import com.yllielshani.twocentsdemo.data.enums.Tier
 import com.yllielshani.twocentsdemo.data.model.ItemDto
+import com.yllielshani.twocentsdemo.data.model.PosterInfo
 
 @Composable
 fun ItemCard(
@@ -22,71 +40,88 @@ fun ItemCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Box(
-        modifier
+    Card(
+        modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp)
-            .clickable(onClick = onClick)
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.DarkGray)
     ) {
-        Card(
-            shape = RoundedCornerShape(12.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.DarkGray),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column(Modifier.padding(16.dp)) {
-                Row(
-                    Modifier
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Top
-                ) {
-                    IconTextRow(
-                        text = item.title,
-                        icon = Icons.Default.Info,
-                        contentDescription = null
-                    )
-                }
-                Spacer(Modifier.height(8.dp))
-                Text(
-                    text = item.description,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.White
-                )
-                Spacer(Modifier.height(8.dp))
-                PlaceholderComposable(Modifier.fillMaxWidth())
+        Column(Modifier.padding(16.dp)) {
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconTextRow(tier = item.tier, label = item.title)
+                NumberBadge(number = number)
             }
+            Spacer(Modifier.height(8.dp))
+            Text(item.description, style = MaterialTheme.typography.bodyMedium, color = Color.White)
+            Spacer(Modifier.height(8.dp))
+            PlaceholderComposable(poster = item.posterInfo)
         }
-        NumberBadge(
-            number = number,
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .offset(x = 8.dp, y = 8.dp)
-        )
     }
 }
 
 @Composable
 fun IconTextRow(
-    text: String,
-    icon: ImageVector,
-    contentDescription: String?,
+    tier: Tier,
+    label: String,
     modifier: Modifier = Modifier
 ) {
+    val shimmerColor = Color.White.copy(alpha = 0.4f)
+    val borderColor = Color.LightGray
+    val backgroundColor = Color.Black
+    val cornerRadius = 32.dp
+
+    val shimmerTranslate = rememberInfiniteTransition(label = "")
+    val shimmerOffset by shimmerTranslate.animateFloat(
+        initialValue = 0f,
+        targetValue = 1000f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 1200, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ), label = ""
+    )
+
+    val shimmerBrush = Brush.linearGradient(
+        colors = listOf(Color.Transparent, shimmerColor, Color.Transparent),
+        start = Offset.Zero,
+        end = Offset(x = shimmerOffset, y = shimmerOffset)
+    )
+
+    val textColor = when (tier) {
+        Tier.Gold -> Color(0xFFFFD700)
+        Tier.Silver -> Color(0xFFC0C0C0)
+        Tier.Bronze -> Color(0xFFCD7F32)
+    }
+
     Row(
-        modifier = modifier,
+        modifier = modifier
+            .background(backgroundColor, RoundedCornerShape(cornerRadius))
+            .border(1.dp, borderColor, RoundedCornerShape(cornerRadius))
+            .drawWithCache {
+                onDrawWithContent {
+                    drawContent()
+                    drawRect(shimmerBrush, blendMode = BlendMode.SrcOver)
+                }
+            }
+            .padding(horizontal = 12.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         Text(
-            text = text,
-            style = MaterialTheme.typography.titleMedium,
-            color = Color.White
+            text = label,
+            style = MaterialTheme.typography.titleSmall,
+            color = textColor
         )
         Icon(
-            imageVector = icon,
-            contentDescription = contentDescription,
-            tint = Color.White,
-            modifier = Modifier.size(20.dp)
+            imageVector = Icons.Default.Lock,
+            contentDescription = "Tier Icon",
+            tint = textColor,
+            modifier = Modifier.size(18.dp)
         )
     }
 }
@@ -106,7 +141,46 @@ fun NumberBadge(
     )
 }
 
+
 @Composable
-fun PlaceholderComposable(modifier: Modifier = Modifier) {
-    Box(modifier.height(40.dp))
+fun PlaceholderComposable(
+    poster: PosterInfo,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(top = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        InfoItem(icon = Icons.Default.Star, text = poster.age.toString())
+        InfoItem(icon = Icons.Default.ThumbUp, text = poster.gender)
+        InfoItem(icon = Icons.Default.Place, text = poster.location)
+    }
+}
+
+@Composable
+private fun InfoItem(
+    icon: ImageVector,
+    text: String,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = Color.White,
+            modifier = Modifier.size(16.dp)
+        )
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodySmall,
+            color = Color.White
+        )
+    }
 }

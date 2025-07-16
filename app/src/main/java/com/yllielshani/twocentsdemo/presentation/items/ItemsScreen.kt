@@ -13,6 +13,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.yllielshani.twocentsdemo.data.model.ItemDto
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.yllielshani.twocentsdemo.data.enums.Tier
+import com.yllielshani.twocentsdemo.data.model.PosterInfo
 
 @Composable
 fun HomeScreen(
@@ -43,11 +45,13 @@ fun HomeScreen(
 
         is HomeUiState.Success -> {
             val list = (uiState as HomeUiState.Success).items
-            LazyColumn(Modifier.fillMaxSize(),
+            LazyColumn(
+                Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(
                     top = 16.dp,
                     bottom = 16.dp
-                )) {
+                )
+            ) {
                 itemsIndexed(list) { index, item ->
                     ItemCard(
                         number = list.size - index,
@@ -91,8 +95,14 @@ fun Preview_HomeScreen_Success() {
     HomeScreen(
         uiState = HomeUiState.Success(
             listOf(
-                ItemDto(1, "A", "Alpha"),
-                ItemDto(2, "B", "Beta")
+                ItemDto(
+                    1, "A", "Alpha", Tier.Silver,
+                    posterInfo = PosterInfo(age = 24, gender = "F", location = "Paris", 23423)
+                ),
+                ItemDto(
+                    2, "B", "Beta", Tier.Gold,
+                    posterInfo = PosterInfo(age = 24, gender = "F", location = "Paris", 23423)
+                )
             )
         ),
         onRetry = {}

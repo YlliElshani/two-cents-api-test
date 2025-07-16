@@ -111,4 +111,18 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.hilt.navigation.compose)
 
+    // Retrofit
+    implementation(libs.retrofit)
+    implementation(libs.converter.moshi)
+
+    // Moshi
+    implementation(libs.moshi)
+    implementation(libs.moshi.kotlin)
+
+    // Moshi Codegen (optional, if you use @JsonClass(generateAdapter = true))
+    ksp(libs.moshi.kotlin.codegen)
+
+    // OkHttp (optional, for logging/debugging)
+    implementation(libs.logging.interceptor)
+
 }

@@ -33,14 +33,14 @@ class FakeItemApiService @Inject constructor() : ApiService {
         )
     )
 
-    override suspend fun getItems(): List<PostDto> {
-        delay(2000)
-        return items
-    }
+   override suspend fun getItems(): List<PostDto> {
+       delay(2000)
+       return items
+   }
 
-    override suspend fun getPostById(id: String): PostDto {
-        delay(1000)
-        return items.firstOrNull { it.id == id }
-            ?: throw IllegalArgumentException("Post not found")
-    }
+   override suspend fun getPostById(id: String): PostDto {
+       delay(1000)
+       return items.firstOrNull { it.id == id }
+           ?: throw IllegalArgumentException("Post not found")
+   }
 }

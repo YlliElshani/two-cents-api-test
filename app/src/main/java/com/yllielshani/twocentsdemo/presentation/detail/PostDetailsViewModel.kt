@@ -3,7 +3,7 @@ package com.yllielshani.twocentsdemo.presentation.detail
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.yllielshani.twocentsdemo.data.model.PostDto
-import com.yllielshani.twocentsdemo.data.repository.ItemRepository
+import com.yllielshani.twocentsdemo.data.repository.PostRepository
 import com.yllielshani.twocentsdemo.presentation.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,7 +15,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PostDetailsViewModel @Inject constructor(
-    private val repository: ItemRepository
+    private val repository: PostRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<UiState<PostDto>>(UiState.Loading)

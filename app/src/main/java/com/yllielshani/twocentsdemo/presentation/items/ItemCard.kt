@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Star
@@ -32,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import com.yllielshani.twocentsdemo.data.enums.Tier
 import com.yllielshani.twocentsdemo.data.model.ItemDto
 import com.yllielshani.twocentsdemo.data.model.PosterInfo
+import com.yllielshani.twocentsdemo.utils.formatAmountWithDots
 
 @Composable
 fun ItemCard(
@@ -54,7 +54,7 @@ fun ItemCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconTextRow(tier = item.tier, label = item.title)
+                IconTextRow(tier = item.tier, label = item.posterInfo.assetCount)
                 NumberBadge(number = number)
             }
             Spacer(Modifier.height(8.dp))
@@ -68,7 +68,7 @@ fun ItemCard(
 @Composable
 fun IconTextRow(
     tier: Tier,
-    label: String,
+    label: Int,
     modifier: Modifier = Modifier
 ) {
     val shimmerColor = Color.White.copy(alpha = 0.4f)
@@ -98,6 +98,8 @@ fun IconTextRow(
         Tier.Bronze -> Color(0xFFCD7F32)
     }
 
+    val formattedAmount = formatAmountWithDots(label)
+
     Row(
         modifier = modifier
             .background(backgroundColor, RoundedCornerShape(cornerRadius))
@@ -113,7 +115,7 @@ fun IconTextRow(
         horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         Text(
-            text = label,
+            text = formattedAmount,
             style = MaterialTheme.typography.titleSmall,
             color = textColor
         )

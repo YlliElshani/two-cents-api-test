@@ -54,7 +54,7 @@ fun HomeScreen(
             ) {
                 itemsIndexed(list) { index, item ->
                     ItemCard(
-                        number = list.size - index,
+                        number = index + 1,
                         item = item,
                         onClick = {}
                     )

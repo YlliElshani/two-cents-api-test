@@ -1,11 +1,14 @@
 package com.yllielshani.twocentsdemo.presentation.items
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.yllielshani.twocentsdemo.data.enums.Filter
 import com.yllielshani.twocentsdemo.data.model.PostDto
 import com.yllielshani.twocentsdemo.data.repository.PostRepository
 import com.yllielshani.twocentsdemo.presentation.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,14 +28,19 @@ class HomeViewModel @Inject constructor(
     }
 
 
-    fun loadItems() {
+    fun loadItems(filter: Filter = Filter.NewToday, secretKey: String? = null) {
         viewModelScope.launch {
-            try {
-                val items = repository.fetchItems()
-                _uiState.value = if (items.isEmpty()) UiState.Empty else UiState.Success(items)
-            } catch (e: Exception) {
-                _uiState.value = UiState.Error("Failed to load items")
-            }
+            _uiState.value = UiState.Loading
+            repository.fetchItems(filter, secretKey)
+                .fold(
+                    onSuccess = { items ->
+                        _uiState.value = if (items.isEmpty()) UiState.Empty else UiState.Success(items)
+                    },
+                    onFailure = { error ->
+                        _uiState.value = UiState.Error(error.localizedMessage.orEmpty())
+                    }
+                )
         }
     }
+
 }

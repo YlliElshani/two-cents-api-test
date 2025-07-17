@@ -3,9 +3,10 @@ package com.yllielshani.twocentsdemo.di
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.yllielshani.twocentsdemo.data.api.ApiService
-import com.yllielshani.twocentsdemo.data.api.FakeItemApiService
 import com.yllielshani.twocentsdemo.data.repository.PostRepository
 import com.yllielshani.twocentsdemo.data.repository.PostRepositoryImpl
+import com.yllielshani.twocentsdemo.utils.BigDecimalAdapter
+import com.yllielshani.twocentsdemo.utils.InstantAdapter
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -30,35 +31,34 @@ abstract class RepositoryModule {
 @Module
 @InstallIn(SingletonComponent::class)
 class ApiModule {
+
+    @Provides @Singleton
+    fun provideRetrofit(moshi: Moshi, okHttpClient: OkHttpClient): Retrofit =
+        Retrofit.Builder()
+            .baseUrl("https://api.twocents.money/")
+            .client(okHttpClient)
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .build()
+
+    @Provides @Singleton
+    fun provideApiService(retrofit: Retrofit): ApiService =
+        retrofit.create(ApiService::class.java)
+
     @Provides
     @Singleton
-    fun provideItemApiService(): ApiService = FakeItemApiService()
+    fun provideOkHttpClient(): OkHttpClient =
+        OkHttpClient.Builder()
+            .addInterceptor(HttpLoggingInterceptor().apply {
+                level = HttpLoggingInterceptor.Level.BODY
+            })
+            .build()
 
-//    @Provides @Singleton
-//    fun provideRetrofit(moshi: Moshi, okHttpClient: OkHttpClient): Retrofit =
-//        Retrofit.Builder()
-//            .baseUrl("https://api.twocents.money/")
-//            .client(okHttpClient)
-//            .addConverterFactory(MoshiConverterFactory.create(moshi))
-//            .build()
-//
-//    @Provides @Singleton
-//    fun provideApiService(retrofit: Retrofit): ApiService =
-//        retrofit.create(FakeItemApiService::class.java)
-//
-//    @Provides
-//    @Singleton
-//    fun provideOkHttpClient(): OkHttpClient =
-//        OkHttpClient.Builder()
-//            .addInterceptor(HttpLoggingInterceptor().apply {
-//                level = HttpLoggingInterceptor.Level.BODY
-//            })
-//            .build()
-//
-//
-//    @Provides
-//    @Singleton
-//    fun provideMoshi(): Moshi = Moshi.Builder()
-//        .add(KotlinJsonAdapterFactory())
-//        .build()
+
+    @Provides
+    @Singleton
+    fun provideMoshi(): Moshi = Moshi.Builder()
+        .add(KotlinJsonAdapterFactory())
+        .add(BigDecimalAdapter())
+        .add(InstantAdapter())
+        .build()
 }

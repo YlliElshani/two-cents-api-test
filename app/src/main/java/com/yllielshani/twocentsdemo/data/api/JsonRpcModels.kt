@@ -1,28 +1,24 @@
 package com.yllielshani.twocentsdemo.data.api
 
 import com.squareup.moshi.JsonClass
-import java.util.UUID
 
 
 @JsonClass(generateAdapter = true)
-data class JsonRpcRequest<Params>(
+data class JsonRpcRequest(
     val jsonrpc: String = "2.0",
-    val id: String = UUID.randomUUID().toString(),
+    val id: String = "anon",
     val method: String,
-    val params: Params
+    val params: Map<String, Any>
 )
 
-@JsonClass(generateAdapter = true)
-data class JsonRpcResponse<Result>(
-    val jsonrpc: String,
-    val id: String,
-    val result: Result?,
-    val error: RpcError?
+data class JsonRpcResponse<T>(
+    val jsonrpc: String?,
+    val id: String?,
+    val result: T?,
+    val error: JsonRpcError?
 )
 
-@JsonClass(generateAdapter = true)
-data class RpcError(
+data class JsonRpcError(
     val code: Int,
-    val message: String,
-    val data: Any? = null
+    val message: String
 )

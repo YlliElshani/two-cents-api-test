@@ -1,5 +1,6 @@
 package com.yllielshani.twocentsdemo.presentation.detail
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -50,9 +51,10 @@ fun PostDetailsScreen(
         }
 
         is UiState.Error -> Box(Modifier.fillMaxSize(), Alignment.Center) {
+            Log.d("yll1","got error: ${uiState.message}")
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
-                    "Error: ${uiState.message}",
+                    "Error",
                     style = MaterialTheme.typography.bodyLarge
                 )
                 Spacer(Modifier.height(8.dp))
@@ -69,9 +71,9 @@ fun PostDetailsScreen(
             ) {
                 Text(text = item.title, style = MaterialTheme.typography.headlineMedium)
                 Spacer(Modifier.height(8.dp))
-                Text(text = item.description, style = MaterialTheme.typography.bodyLarge)
+                Text(text = item.text, style = MaterialTheme.typography.bodyLarge)
                 Spacer(Modifier.height(12.dp))
-                Text("Posted by: ${item.posterInfo.age}y ${item.posterInfo.gender} from ${item.posterInfo.location}")
+                Text("Posted by: ${item.authorMetaDto.age}y ${item.authorMetaDto.gender} from ${item.authorMetaDto.arena}")
             }
         }
     }

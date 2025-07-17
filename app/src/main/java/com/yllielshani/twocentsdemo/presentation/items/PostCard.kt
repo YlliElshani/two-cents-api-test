@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.yllielshani.twocentsdemo.data.enums.Tier
+import com.yllielshani.twocentsdemo.data.model.AuthorMetaDto
 import com.yllielshani.twocentsdemo.data.model.PostDto
 import com.yllielshani.twocentsdemo.data.model.PosterInfo
 import com.yllielshani.twocentsdemo.utils.formatAmountWithDots
@@ -54,13 +55,14 @@ fun PostCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconTextRow(tier = item.tier, label = item.posterInfo.assetCount)
+                //todo(yll1): fix tier
+                IconTextRow(tier = Tier.Gold, label = 123123) //todo(yll1): fix amount of money 18609.37  item.posterInfo.assetCount)
                 UserAssets(number = number)
             }
             Spacer(Modifier.height(8.dp))
-            Text(item.description, style = MaterialTheme.typography.bodyMedium, color = Color.White)
+            Text(item.text, style = MaterialTheme.typography.bodyMedium, color = Color.White)
             Spacer(Modifier.height(8.dp))
-            UserInformation(poster = item.posterInfo)
+            UserInformation(poster = item.authorMetaDto)
         }
     }
 }
@@ -146,7 +148,7 @@ fun UserAssets(
 
 @Composable
 fun UserInformation(
-    poster: PosterInfo,
+    poster: AuthorMetaDto,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -158,7 +160,7 @@ fun UserInformation(
     ) {
         InfoItem(icon = Icons.Default.Star, text = poster.age.toString())
         InfoItem(icon = Icons.Default.ThumbUp, text = poster.gender)
-        InfoItem(icon = Icons.Default.Place, text = poster.location)
+        InfoItem(icon = Icons.Default.Place, text = poster.arena)
     }
 }
 

@@ -1,5 +1,6 @@
 package com.yllielshani.twocentsdemo.presentation.items
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -34,10 +35,11 @@ fun HomeScreen(
         }
 
         is UiState.Error -> {
+            Log.d("yll1", "got error: ${uiState.message}")
             Box(Modifier.fillMaxSize(), Alignment.Center) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        "Error: ${(uiState as UiState.Error).message}",
+                        "Error",
                         style = MaterialTheme.typography.bodyLarge
                     )
                     Spacer(Modifier.height(8.dp))
@@ -59,7 +61,7 @@ fun HomeScreen(
                     PostCard(
                         number = index + 1,
                         item = item,
-                        onClick = { onPostClick(item.id) }
+                        onClick = { onPostClick(item.uuid) }
                     )
                     Divider()
                 }
@@ -92,25 +94,4 @@ fun Preview_HomeScreen_Empty() {
 @Composable
 fun Preview_HomeScreen_Error() {
     HomeScreen(uiState = UiState.Error("Network failed"), onRetry = {}, onPostClick = {})
-}
-
-@Preview(showBackground = true)
-@Composable
-fun Preview_HomeScreen_Success() {
-    HomeScreen(
-        uiState = UiState.Success(
-            listOf(
-                PostDto(
-                    "1", "A", "Alpha", Tier.Silver,
-                    posterInfo = PosterInfo(age = 24, gender = "F", location = "Paris", 23423)
-                ),
-                PostDto(
-                    "2", "B", "Beta", Tier.Gold,
-                    posterInfo = PosterInfo(age = 24, gender = "F", location = "Paris", 23423)
-                )
-            )
-        ),
-        onRetry = {},
-        onPostClick = {}
-    )
 }

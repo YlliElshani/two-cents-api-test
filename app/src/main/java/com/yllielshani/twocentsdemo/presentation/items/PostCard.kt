@@ -9,30 +9,47 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.ThumbUp
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.yllielshani.twocentsdemo.data.enums.Tier
+import com.yllielshani.twocentsdemo.data.enums.SubscriptionTypeEnum
 import com.yllielshani.twocentsdemo.data.model.AuthorMetaDto
 import com.yllielshani.twocentsdemo.data.model.PostDto
-import com.yllielshani.twocentsdemo.data.model.PosterInfo
-import com.yllielshani.twocentsdemo.utils.formatAmountWithDots
+import java.math.BigDecimal
+import java.text.NumberFormat
+import java.util.Locale
 
 @Composable
 fun PostCard(
@@ -55,8 +72,12 @@ fun PostCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                //todo(yll1): fix tier
-                IconTextRow(tier = Tier.Gold, label = 123123) //todo(yll1): fix amount of money 18609.37  item.posterInfo.assetCount)
+                IconTextRow(
+                    subscriptionTypeEnum = getSubscriptionType(
+                        item.authorMetaDto.subscriptionType.toInt()
+                    ),
+                    amount = formatCurrency(item.authorMetaDto.balance),
+                )
                 UserAssets(number = number)
             }
             Spacer(Modifier.height(8.dp))
@@ -69,62 +90,34 @@ fun PostCard(
 
 @Composable
 fun IconTextRow(
-    tier: Tier,
-    label: Int,
-    modifier: Modifier = Modifier
+    subscriptionTypeEnum: SubscriptionTypeEnum,
+    amount: String,
+    modifier: Modifier = Modifier,
+    shape: Shape = RoundedCornerShape(32.dp),
+    containerColor: Color = Color.Black,
+    borderColor: Color = Color.LightGray,
+    borderWidth: Dp = 1.dp,
+    padding: PaddingValues = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
 ) {
-    val shimmerColor = Color.White.copy(alpha = 0.4f)
-    val borderColor = Color.LightGray
-    val backgroundColor = Color.Black
-    val cornerRadius = 32.dp
-
-    val shimmerTranslate = rememberInfiniteTransition(label = "")
-    val shimmerOffset by shimmerTranslate.animateFloat(
-        initialValue = 0f,
-        targetValue = 1000f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 1200, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ), label = ""
-    )
-
-    val shimmerBrush = Brush.linearGradient(
-        colors = listOf(Color.Transparent, shimmerColor, Color.Transparent),
-        start = Offset.Zero,
-        end = Offset(x = shimmerOffset, y = shimmerOffset)
-    )
-
-    val textColor = when (tier) {
-        Tier.Gold -> Color(0xFFFFD700)
-        Tier.Silver -> Color(0xFFC0C0C0)
-        Tier.Bronze -> Color(0xFFCD7F32)
-    }
-
-    val formattedAmount = formatAmountWithDots(label)
-
     Row(
         modifier = modifier
-            .background(backgroundColor, RoundedCornerShape(cornerRadius))
-            .border(1.dp, borderColor, RoundedCornerShape(cornerRadius))
-            .drawWithCache {
-                onDrawWithContent {
-                    drawContent()
-                    drawRect(shimmerBrush, blendMode = BlendMode.SrcOver)
-                }
-            }
-            .padding(horizontal = 12.dp, vertical = 6.dp),
+            .clip(shape)
+            .background(containerColor)
+            .border(borderWidth, borderColor, shape)
+            .shimmer(durationMillis = 1200)
+            .padding(padding),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         Text(
-            text = formattedAmount,
+            text = amount,
             style = MaterialTheme.typography.titleSmall,
-            color = textColor
+            color = subscriptionTypeEnum.textColor()
         )
         Icon(
             imageVector = Icons.Default.Lock,
-            contentDescription = "Tier Icon",
-            tint = textColor,
+            contentDescription = null,
+            tint = subscriptionTypeEnum.textColor(),
             modifier = Modifier.size(18.dp)
         )
     }
@@ -187,4 +180,54 @@ private fun InfoItem(
             color = Color.White
         )
     }
+}
+
+fun getSubscriptionType(level: Int): SubscriptionTypeEnum {
+    return SubscriptionTypeEnum.entries.firstOrNull { it.subscriptionLevel == level }
+        ?: SubscriptionTypeEnum.Bronze
+}
+
+
+fun Modifier.shimmer(
+    colors: List<Color> = listOf(Color.Transparent, Color.White.copy(alpha = 0.4f), Color.Transparent),
+    shimmerWidth: Float = 200f,
+    durationMillis: Int = 1200
+): Modifier = composed {
+    val transition = rememberInfiniteTransition(label = "")
+    val progress by transition.animateFloat(
+        initialValue  = 0f,
+        targetValue   = 1f,
+        animationSpec = infiniteRepeatable(
+            animation  = tween(durationMillis, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ), label = ""
+    )
+
+    drawWithCache {
+        val widthPx   = size.width
+        val band      = shimmerWidth
+        val offsetX   = (widthPx + band) * progress - band
+        val brush     = Brush.linearGradient(
+            colors,
+            start = Offset(offsetX, 0f),
+            end   = Offset(offsetX + band, 0f)
+        )
+
+        onDrawWithContent {
+            drawContent()
+            drawRect(brush, blendMode = BlendMode.SrcOver)
+        }
+    }
+}
+
+private fun SubscriptionTypeEnum.textColor(): Color = when (this) {
+    SubscriptionTypeEnum.Platinum -> Color(0xFF2D2C28)
+    SubscriptionTypeEnum.Gold -> Color(0xFFFFD700)
+    SubscriptionTypeEnum.Silver -> Color(0xFFC0C0C0)
+    SubscriptionTypeEnum.Bronze -> Color(0xFFCD7F32)
+}
+
+fun formatCurrency(amount: BigDecimal, locale: Locale = Locale.US): String {
+    val formatter = NumberFormat.getCurrencyInstance(locale)
+    return formatter.format(amount)
 }

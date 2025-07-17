@@ -14,8 +14,6 @@ import androidx.compose.ui.unit.dp
 import com.yllielshani.twocentsdemo.data.model.PostDto
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.yllielshani.twocentsdemo.data.enums.Tier
-import com.yllielshani.twocentsdemo.data.model.PosterInfo
 import com.yllielshani.twocentsdemo.presentation.NavRoutes
 import com.yllielshani.twocentsdemo.presentation.UiState
 

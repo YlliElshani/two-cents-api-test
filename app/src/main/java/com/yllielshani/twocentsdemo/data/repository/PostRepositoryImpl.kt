@@ -22,9 +22,29 @@ class PostRepositoryImpl @Inject constructor(
             val request = JsonRpcRequest(id = "anon", method = "/v1/posts/arena", params = params)
             runCatching {
                 val response = apiService.getItems(request)
-                response.result?.items ?: throw Throwable(response.error?.message.orEmpty())
+                response.result?.posts ?: throw Throwable(response.error?.message.orEmpty())
             }
         }
+
+    override suspend fun fetchPostsPerAuthor(
+        filter: Filter,
+        secretKey: String?,
+        authorId: String
+    ): Result<List<PostDto>> = withContext(Dispatchers.IO) {
+        val params = mapOf("user_uuid" to authorId)
+        val request = JsonRpcRequest(
+            id = "anon",
+            method = "/v1/users/get",
+            params = params
+        )
+
+        runCatching {
+            val wrapper = apiService.getItemsPerAuthor(request).result
+                ?: throw Throwable("Empty RPC result")
+
+            wrapper.recentPosts
+        }
+    }
 
     override suspend fun fetchItemById(id: String): PostDto {
         return apiService.getPostById(id)

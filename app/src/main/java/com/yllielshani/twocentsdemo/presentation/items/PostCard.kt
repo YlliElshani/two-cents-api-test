@@ -20,16 +20,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,8 +43,10 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.yllielshani.twocentsdemo.R
 import com.yllielshani.twocentsdemo.data.enums.SubscriptionTypeEnum
 import com.yllielshani.twocentsdemo.data.model.AuthorMetaDto
 import com.yllielshani.twocentsdemo.data.model.PostDto
@@ -56,6 +59,7 @@ fun PostCard(
     number: Int,
     item: PostDto,
     onClick: () -> Unit,
+    onPosterNetWorthClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -77,6 +81,7 @@ fun PostCard(
                         item.authorMetaDto.subscriptionType.toInt()
                     ),
                     amount = formatCurrency(item.authorMetaDto.balance),
+                    onClick = onPosterNetWorthClick
                 )
                 UserAssets(number = number)
             }
@@ -97,14 +102,20 @@ fun IconTextRow(
     containerColor: Color = Color.Black,
     borderColor: Color = Color.LightGray,
     borderWidth: Dp = 1.dp,
-    padding: PaddingValues = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+    padding: PaddingValues = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+    onClick: () -> Unit = {}
 ) {
+    val contentColor = when (subscriptionTypeEnum) {
+        SubscriptionTypeEnum.Platinum -> Color.White
+        else -> subscriptionTypeEnum.textColor()
+    }
     Row(
         modifier = modifier
             .clip(shape)
             .background(containerColor)
             .border(borderWidth, borderColor, shape)
             .shimmer(durationMillis = 1200)
+            .clickable(onClick = onClick)
             .padding(padding),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp)
@@ -112,14 +123,15 @@ fun IconTextRow(
         Text(
             text = amount,
             style = MaterialTheme.typography.titleSmall,
-            color = subscriptionTypeEnum.textColor()
+            color = contentColor
         )
-        Icon(
-            imageVector = Icons.Default.Lock,
-            contentDescription = null,
-            tint = subscriptionTypeEnum.textColor(),
-            modifier = Modifier.size(18.dp)
-        )
+        CompositionLocalProvider(LocalContentColor provides contentColor) {
+            Icon(
+                painter = painterResource(id = R.drawable.ic_dollar_sign),
+                contentDescription = null,
+                modifier = Modifier.size(18.dp)
+            )
+        }
     }
 }
 

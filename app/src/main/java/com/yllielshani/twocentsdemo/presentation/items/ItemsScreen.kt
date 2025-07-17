@@ -1,19 +1,27 @@
 package com.yllielshani.twocentsdemo.presentation.items
 
 import android.util.Log
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.yllielshani.twocentsdemo.data.model.PostDto
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.yllielshani.twocentsdemo.data.model.PostDto
 import com.yllielshani.twocentsdemo.presentation.NavRoutes
 import com.yllielshani.twocentsdemo.presentation.UiState
 
@@ -21,7 +29,8 @@ import com.yllielshani.twocentsdemo.presentation.UiState
 fun HomeScreen(
     uiState: UiState<List<PostDto>>,
     onRetry: () -> Unit,
-    onPostClick: (String) -> Unit
+    onPostClick: (String) -> Unit,
+    onPosterNetWorthClick: (String) -> Unit
 ) {
     when (uiState) {
         UiState.Loading -> Box(Modifier.fillMaxSize(), Alignment.Center) {
@@ -33,7 +42,6 @@ fun HomeScreen(
         }
 
         is UiState.Error -> {
-            Log.d("yll1", "got error: ${uiState.message}")
             Box(Modifier.fillMaxSize(), Alignment.Center) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
@@ -47,7 +55,7 @@ fun HomeScreen(
         }
 
         is UiState.Success -> {
-            val list = (uiState as UiState.Success).data
+            val list = uiState.data
             LazyColumn(
                 Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(
@@ -59,9 +67,9 @@ fun HomeScreen(
                     PostCard(
                         number = index + 1,
                         item = item,
-                        onClick = { onPostClick(item.uuid) }
+                        onClick = { onPostClick(item.uuid) },
+                        onPosterNetWorthClick = { onPosterNetWorthClick(item.authorUuid) }
                     )
-                    Divider()
                 }
             }
         }
@@ -70,26 +78,18 @@ fun HomeScreen(
 
 @Composable
 fun HomeRoute(navController: NavController, viewModel: HomeViewModel = hiltViewModel()) {
+    LaunchedEffect(Unit) { viewModel.loadItems() }
     val state = viewModel.uiState.collectAsState().value
-    HomeScreen(uiState = state, onRetry = viewModel::loadItems, onPostClick = { postId ->
-        navController.navigate(NavRoutes.PostDetails.createRoute(postId))
-    })
-}
 
-@Preview(showBackground = true)
-@Composable
-fun Preview_HomeScreen_Loading() {
-    HomeScreen(uiState = UiState.Loading, onRetry = {}, onPostClick = {})
-}
-
-@Preview(showBackground = true)
-@Composable
-fun Preview_HomeScreen_Empty() {
-    HomeScreen(uiState = UiState.Empty, onRetry = {}, onPostClick = {})
-}
-
-@Preview(showBackground = true)
-@Composable
-fun Preview_HomeScreen_Error() {
-    HomeScreen(uiState = UiState.Error("Network failed"), onRetry = {}, onPostClick = {})
+    HomeScreen(
+        uiState = state,
+        onRetry = viewModel::loadItems,
+        onPostClick = { id ->
+            navController.navigate(NavRoutes.PostDetails.createRoute(id))
+        },
+        onPosterNetWorthClick = { id ->
+            Log.d("nav-debug", "TAP balance → navigate to author_posts/$id")
+            navController.navigate(NavRoutes.AuthorPosts.createRoute(id))
+        }
+    )
 }

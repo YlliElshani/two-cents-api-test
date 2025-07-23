@@ -4,6 +4,7 @@ import com.yllielshani.twocentsdemo.data.api.ApiService
 import com.yllielshani.twocentsdemo.data.api.JsonRpcRequest
 import com.yllielshani.twocentsdemo.data.enums.Filter
 import com.yllielshani.twocentsdemo.data.model.PostDto
+import com.yllielshani.twocentsdemo.data.model.PostWrapperDto
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -46,7 +47,19 @@ class PostRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun fetchItemById(id: String): PostDto {
-        return apiService.getPostById(id)
-    }
+    override suspend fun fetchPostById(id: String, secretKey: String?): Result<PostDto> =
+        withContext(Dispatchers.IO) {
+            val params = buildMap<String, Any> {
+                put("post_uuid", id)
+                secretKey?.let { put("secret_key", it) }
+            }
+            val request = JsonRpcRequest(id = "anon", method = "/v1/posts/get", params = params)
+            runCatching {
+                val response = apiService.getPostById(request)
+                val post = response.result?.postDetails
+                    ?: throw Throwable("Post not found or response was malformed.")
+                post
+            }
+        }
+
 }

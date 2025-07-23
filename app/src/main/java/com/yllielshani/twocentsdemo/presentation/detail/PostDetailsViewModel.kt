@@ -1,5 +1,6 @@
 package com.yllielshani.twocentsdemo.presentation.detail
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.yllielshani.twocentsdemo.data.model.PostDto
@@ -24,8 +25,11 @@ class PostDetailsViewModel @Inject constructor(
     fun loadPost(postId: String) {
         viewModelScope.launch {
             try {
-                val post = repository.fetchItemById(postId)
-                _uiState.value = UiState.Success(post)
+                repository.fetchPostById(postId, "anon").onFailure {
+                    Log.d("yll1", "API failed: $it")
+                }.onSuccess {
+                    _uiState.value = UiState.Success(it)
+                }
             } catch (e: Exception) {
                 _uiState.value = UiState.Error("Failed to load post")
             }

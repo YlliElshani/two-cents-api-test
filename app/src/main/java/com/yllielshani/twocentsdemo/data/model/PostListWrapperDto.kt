@@ -4,7 +4,7 @@ import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
-data class PostWrapperDto (
-    @Json(name = "post")
-    val postDetails: PostDto
+data class PostListWrapperDto(
+    @Json(name = "posts")
+    val posts: List<PostDto>
 )

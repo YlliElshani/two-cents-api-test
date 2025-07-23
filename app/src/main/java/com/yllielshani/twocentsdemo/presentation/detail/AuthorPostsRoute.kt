@@ -6,8 +6,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.yllielshani.twocentsdemo.presentation.NavRoutes
-import com.yllielshani.twocentsdemo.presentation.items.HomeScreen
-import com.yllielshani.twocentsdemo.presentation.items.HomeViewModel
+import com.yllielshani.twocentsdemo.presentation.posts.HomeScreen
+import com.yllielshani.twocentsdemo.presentation.posts.HomeViewModel
 
 @Composable
 fun AuthorPostsRoute(

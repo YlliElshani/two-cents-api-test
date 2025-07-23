@@ -5,7 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.navigation.compose.rememberNavController
-import com.yllielshani.twocentsdemo.presentation.AppNavGraph
+import com.yllielshani.twocentsdemo.presentation.home.TwoCentsHomeScreen
 import com.yllielshani.twocentsdemo.ui.theme.TwoCentsDemoTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -18,7 +18,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             TwoCentsDemoTheme {
                 val navController = rememberNavController()
-                AppNavGraph(navController = navController)
+                TwoCentsHomeScreen(navController)
             }
         }
     }

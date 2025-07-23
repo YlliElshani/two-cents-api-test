@@ -1,4 +1,4 @@
-package com.yllielshani.twocentsdemo.presentation.items
+package com.yllielshani.twocentsdemo.presentation.posts
 
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -11,6 +11,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,10 +20,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Place
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -42,7 +39,7 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -52,6 +49,8 @@ import com.yllielshani.twocentsdemo.data.model.AuthorMetaDto
 import com.yllielshani.twocentsdemo.data.model.PostDto
 import java.math.BigDecimal
 import java.text.NumberFormat
+import java.time.Duration
+import java.time.Instant
 import java.util.Locale
 
 @Composable
@@ -154,26 +153,50 @@ fun UserAssets(
 @Composable
 fun UserInformation(
     poster: AuthorMetaDto,
+    postedAt: Instant? = null,
     modifier: Modifier = Modifier
 ) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(top = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        InfoItem(icon = Icons.Default.Star, text = poster.age.toString())
-        InfoItem(icon = Icons.Default.ThumbUp, text = poster.gender)
-        InfoItem(icon = Icons.Default.Place, text = poster.arena)
+    val genderTint = when (poster.gender.lowercase()) {
+        "m" -> Color(0xFF42A5F5)
+        "f" -> Color(0xFFEC407A)
+        else -> Color.White
+    }
+
+    if (postedAt != null) {
+        Row(
+            modifier = modifier
+                .fillMaxWidth()
+                .height(IntrinsicSize.Min)
+                .padding(top = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            InfoItem(icon = painterResource(R.drawable.ic_age), text = poster.age.toString())
+            InfoItem(icon = painterResource(R.drawable.ic_person), text = poster.gender, tint = genderTint)
+            InfoItem(icon = painterResource(R.drawable.ic_location), text = poster.arena)
+            InfoItem(icon = painterResource(R.drawable.ic_dollar_chip), text = formatRelativeTime(postedAt), tint = Color.Gray)
+        }
+    } else {
+        Row(
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            InfoItem(icon = painterResource(R.drawable.ic_age), text = poster.age.toString())
+            InfoItem(icon = painterResource(R.drawable.ic_person), text = poster.gender, tint = genderTint)
+            InfoItem(icon = painterResource(R.drawable.ic_location), text = poster.arena)
+        }
     }
 }
 
 @Composable
 private fun InfoItem(
-    icon: ImageVector,
+    modifier: Modifier = Modifier,
+    icon: Painter,
     text: String,
-    modifier: Modifier = Modifier
+    tint: Color = Color.White,
 ) {
     Row(
         modifier = modifier,
@@ -181,15 +204,15 @@ private fun InfoItem(
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         Icon(
-            imageVector = icon,
+            painter = icon,
             contentDescription = null,
-            tint = Color.White,
+            tint = tint,
             modifier = Modifier.size(16.dp)
         )
         Text(
             text = text,
             style = MaterialTheme.typography.bodySmall,
-            color = Color.White
+            color = tint
         )
     }
 }
@@ -242,4 +265,16 @@ private fun SubscriptionTypeEnum.textColor(): Color = when (this) {
 fun formatCurrency(amount: BigDecimal, locale: Locale = Locale.US): String {
     val formatter = NumberFormat.getCurrencyInstance(locale)
     return formatter.format(amount)
+}
+
+fun formatRelativeTime(postedAt: Instant): String {
+    val now = Instant.now()
+    val duration = Duration.between(postedAt, now)
+    return when {
+        duration.toMinutes() < 1 -> "just now"
+        duration.toMinutes() < 60 -> "${duration.toMinutes()} min ago"
+        duration.toHours() < 24 -> "${duration.toHours()} hrs ago"
+        duration.toDays() == 1L -> "yesterday"
+        else -> "${duration.toDays()} days ago"
+    }
 }

@@ -1,6 +1,5 @@
 package com.yllielshani.twocentsdemo.presentation
 
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -9,7 +8,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.yllielshani.twocentsdemo.presentation.detail.AuthorPostsRoute
 import com.yllielshani.twocentsdemo.presentation.detail.PostDetailsRoute
-import com.yllielshani.twocentsdemo.presentation.items.HomeRoute
+import com.yllielshani.twocentsdemo.presentation.posts.HomeRoute
 
 @Composable
 fun AppNavGraph(navController: NavHostController) {
@@ -22,12 +21,15 @@ fun AppNavGraph(navController: NavHostController) {
         }
         composable(
             route = NavRoutes.PostDetails.route,
-            arguments = listOf(navArgument("postId") {
-                type = NavType.StringType
-            })
-        ) {
-            val postId = it.arguments?.getString("postId") ?: return@composable
-            PostDetailsRoute(postId)
+            arguments = listOf(navArgument("postId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val postId = backStackEntry.arguments?.getString("postId") ?: return@composable
+            PostDetailsRoute(
+                postId = postId,
+                onPosterNetWorthClick = { authorId ->
+                    navController.navigate(NavRoutes.AuthorPosts.createRoute(authorId))
+                }
+            )
         }
         composable(
             NavRoutes.AuthorPosts.route,

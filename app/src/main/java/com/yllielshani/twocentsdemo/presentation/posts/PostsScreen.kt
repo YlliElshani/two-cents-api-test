@@ -1,4 +1,4 @@
-package com.yllielshani.twocentsdemo.presentation.items
+package com.yllielshani.twocentsdemo.presentation.posts
 
 import android.util.Log
 import androidx.compose.foundation.layout.Box

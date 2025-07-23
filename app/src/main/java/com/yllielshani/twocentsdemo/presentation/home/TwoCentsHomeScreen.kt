@@ -28,6 +28,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.yllielshani.twocentsdemo.R
 import com.yllielshani.twocentsdemo.presentation.AppNavGraph
 import com.yllielshani.twocentsdemo.presentation.NavRoutes
+import com.yllielshani.twocentsdemo.ui.theme.GoldenOrange
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,7 +38,7 @@ fun TwoCentsHomeScreen(navController: NavHostController) {
     val isHome = route == NavRoutes.Items.route
     val isPost = route == NavRoutes.PostDetails.route
     val isAuthor = route == NavRoutes.AuthorPosts.route
-    val backColor = Color(0xFFFFA042)
+    val backColor = GoldenOrange
     val appName = "twocents"
 
     Scaffold(topBar = {

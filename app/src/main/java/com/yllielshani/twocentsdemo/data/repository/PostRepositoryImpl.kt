@@ -3,8 +3,8 @@ package com.yllielshani.twocentsdemo.data.repository
 import com.yllielshani.twocentsdemo.data.api.ApiService
 import com.yllielshani.twocentsdemo.data.api.JsonRpcRequest
 import com.yllielshani.twocentsdemo.data.enums.Filter
+import com.yllielshani.twocentsdemo.data.model.PollResultsWrapper
 import com.yllielshani.twocentsdemo.data.model.PostDto
-import com.yllielshani.twocentsdemo.data.model.PostWrapperDto
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -22,7 +22,7 @@ class PostRepositoryImpl @Inject constructor(
             }
             val request = JsonRpcRequest(id = "anon", method = "/v1/posts/arena", params = params)
             runCatching {
-                val response = apiService.getItems(request)
+                val response = apiService.getAllPosts(request)
                 response.result?.posts ?: throw Throwable(response.error?.message.orEmpty())
             }
         }
@@ -40,7 +40,7 @@ class PostRepositoryImpl @Inject constructor(
         )
 
         runCatching {
-            val wrapper = apiService.getItemsPerAuthor(request).result
+            val wrapper = apiService.getPostsPerAuthor(request).result
                 ?: throw Throwable("Empty RPC result")
 
             wrapper.recentPosts
@@ -62,4 +62,21 @@ class PostRepositoryImpl @Inject constructor(
             }
         }
 
+    override suspend fun fetchPollResults(
+        id: String,
+        secretKey: String?
+    ): Result<PollResultsWrapper> =
+        withContext(Dispatchers.IO) {
+            val params = buildMap<String, Any> {
+                put("post_uuid", id)
+                secretKey?.let { put("secret_key", it) }
+            }
+            val request = JsonRpcRequest(id = "anon", method = "/v1/polls/get", params = params)
+            runCatching {
+                val response = apiService.getPollResults(request)
+                val post = response.result
+                    ?: throw Throwable("Post not found or response was malformed.")
+                post
+            }
+        }
 }

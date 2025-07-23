@@ -1,13 +1,16 @@
 package com.yllielshani.twocentsdemo.presentation.detail
 
-import android.util.Log
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -20,11 +23,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.material3.Icon
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,6 +35,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -39,12 +43,15 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.yllielshani.twocentsdemo.R
 import com.yllielshani.twocentsdemo.data.enums.VoteState
+import com.yllielshani.twocentsdemo.data.model.PollOption
 import com.yllielshani.twocentsdemo.data.model.PostDto
 import com.yllielshani.twocentsdemo.presentation.UiState
 import com.yllielshani.twocentsdemo.presentation.posts.IconTextRow
 import com.yllielshani.twocentsdemo.presentation.posts.UserInformation
 import com.yllielshani.twocentsdemo.presentation.posts.formatCurrency
 import com.yllielshani.twocentsdemo.presentation.posts.getSubscriptionType
+import com.yllielshani.twocentsdemo.ui.theme.CardBackground
+import com.yllielshani.twocentsdemo.ui.theme.GoldenOrange
 
 @Composable
 fun PostDetailsRoute(
@@ -54,21 +61,23 @@ fun PostDetailsRoute(
     onOptionsClick: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val pollOptions by viewModel.pollOptions.collectAsState()
 
     LaunchedEffect(postId) { viewModel.loadPost(postId) }
 
     PostDetailsScreen(
         uiState = uiState,
+        pollOptions = pollOptions,
         onRetry = { viewModel.loadPost(postId) },
-        onPosterNetWorthClick = onPosterNetWorthClick,
-        onOptionsClick = onOptionsClick
+        onPosterNetWorthClick,
+        onOptionsClick
     )
 }
-
 
 @Composable
 fun PostDetailsScreen(
     uiState: UiState<PostDto>,
+    pollOptions: UiState<List<PollOption>>,
     onRetry: () -> Unit,
     onPosterNetWorthClick: (String) -> Unit,
     onOptionsClick: () -> Unit,
@@ -77,20 +86,16 @@ fun PostDetailsScreen(
     Box(modifier.fillMaxSize()) {
         when (uiState) {
             UiState.Loading -> CircularProgressIndicator(Modifier.align(Alignment.Center))
-            UiState.Empty -> Text(
-                text = "No post data",
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.align(Alignment.Center)
-            )
-
+            UiState.Empty -> Text("No post data", Modifier.align(Alignment.Center))
             is UiState.Error -> ErrorState(
-                message = uiState.message,
-                onRetry = onRetry,
-                modifier = Modifier.align(Alignment.Center)
+                uiState.message,
+                onRetry,
+                Modifier.align(Alignment.Center)
             )
 
             is UiState.Success -> PostDetailsContent(
-                item = uiState.data,
+                post = uiState.data,
+                pollState = pollOptions,
                 onPosterNetWorthClick = onPosterNetWorthClick,
                 onOptionsClick = onOptionsClick
             )
@@ -113,7 +118,8 @@ private fun ErrorState(
 
 @Composable
 private fun PostDetailsContent(
-    item: PostDto,
+    post: PostDto,
+    pollState: UiState<List<PollOption>>,
     onPosterNetWorthClick: (String) -> Unit,
     onOptionsClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -133,7 +139,7 @@ private fun PostDetailsContent(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = item.title,
+                text = post.title,
                 style = MaterialTheme.typography.headlineMedium,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
@@ -143,21 +149,32 @@ private fun PostDetailsContent(
             Spacer(Modifier.width(12.dp))
 
             IconTextRow(
-                subscriptionTypeEnum = getSubscriptionType(item.authorMetaDto.subscriptionType.toInt()),
-                amount = formatCurrency(item.authorMetaDto.balance),
-                onClick = { onPosterNetWorthClick(item.authorUuid) }
+                subscriptionTypeEnum = getSubscriptionType(post.authorMetaDto.subscriptionType.toInt()),
+                amount = formatCurrency(post.authorMetaDto.balance),
+                onClick = { onPosterNetWorthClick(post.authorUuid) }
             )
 
         }
         Spacer(Modifier.height(8.dp))
 
-        Text(item.text, style = MaterialTheme.typography.bodyLarge)
+        Text(post.text, style = MaterialTheme.typography.bodyLarge)
 
         Spacer(Modifier.height(12.dp))
 
+
+        if (post.postType == 2) {
+            when (pollState) {
+                UiState.Loading -> CircularProgressIndicator()
+                is UiState.Error -> Text(pollState.message)
+                is UiState.Success -> PollResultsOptionsContent(pollState.data)
+                else -> Unit
+            }
+            Spacer(Modifier.height(16.dp))
+        }
+
         UserInformation(
-            poster = item.authorMetaDto,
-            postedAt = item.createdAt
+            poster = post.authorMetaDto,
+            postedAt = post.createdAt
         )
 
         Spacer(Modifier.height(16.dp))
@@ -171,12 +188,12 @@ private fun PostDetailsContent(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                StatDisplay(R.drawable.ic_arrow_up, item.upvoteCount, tint = Color(0xFFFFA042))
-                StatDisplay(R.drawable.ic_comment_bubble, item.commentCount)
-                StatDisplay(R.drawable.ic_views, item.viewCount)
+                StatDisplay(R.drawable.ic_arrow_up, post.upvoteCount, tint = GoldenOrange)
+                StatDisplay(R.drawable.ic_comment_bubble, post.commentCount)
+                StatDisplay(R.drawable.ic_views, post.viewCount)
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(item.topic, style = MaterialTheme.typography.labelLarge)
+                Text(post.topic, style = MaterialTheme.typography.labelLarge)
                 Spacer(Modifier.width(8.dp))
                 Icon(
                     painter = painterResource(R.drawable.ic_more),
@@ -222,7 +239,7 @@ fun UserActionsBar(
     onShareClick: () -> Unit = {}
 ) {
     var voteState by remember { mutableStateOf(VoteState.NONE) }
-    var defaultColor = Color(0xFFFFA042)
+    val defaultColor = GoldenOrange
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -234,7 +251,7 @@ fun UserActionsBar(
             modifier = Modifier
                 .size(36.dp)
                 .background(
-                    color = if (voteState == VoteState.UPVOTED) Color(0xFFFFA042) else Color.Transparent,
+                    color = if (voteState == VoteState.UPVOTED) GoldenOrange else Color.Transparent,
                     shape = RoundedCornerShape(8.dp)
                 )
                 .clickable {
@@ -289,5 +306,93 @@ fun UserActionsBar(
                 .clickable(onClick = onShareClick),
             tint = defaultColor
         )
+    }
+}
+
+@Composable
+fun PollResultsOptionsContent(
+    options: List<PollOption>,
+    modifier: Modifier = Modifier
+) {
+    val totalVotes = options.sumOf { it.votes }.coerceAtLeast(1)
+    Column(
+        modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(15.dp))
+            .border(
+                width = 1.dp,
+                color = CardBackground,
+                shape = RoundedCornerShape(15.dp)
+            )
+            .padding(10.dp)
+    ) {
+        options.forEach { opt ->
+            val fraction by animateFloatAsState(
+                targetValue = opt.votes.toFloat() / totalVotes,
+                animationSpec = tween(durationMillis = 1800), label = ""
+            )
+
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .height(48.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(CardBackground)
+            ) {
+                Box(
+                    Modifier
+                        .fillMaxHeight()
+                        .fillMaxWidth(fraction)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(GoldenOrange)
+                )
+                Row(
+                    Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        opt.question,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.White
+                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            opt.votes.toString(),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.White
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Box(
+                            Modifier
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(MaterialTheme.colorScheme.surfaceVariant)
+                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Icon(
+                                    painterResource(R.drawable.ic_dollar_chip),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(16.dp),
+                                    tint = GoldenOrange
+                                )
+                                Text(
+                                    formatCurrency(opt.averageBalance),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = Color.White
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            Spacer(Modifier.height(8.dp))
+        }
     }
 }

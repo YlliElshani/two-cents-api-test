@@ -1,5 +1,1 @@
-![Screenshot](demoAssets/AppDemoHomeScreen.png)
-![Screenshot](demoAssets/AppDemoPosterDetails.png)
-![Screenshot](demoAssets/AppDemoPosterDetails2.png)
-![Screenshot](demoAssets/PostDetailsAPI.png)
-[Watch demo video](demoAssets/TechnicalChallengeWebMVideo.webm)
+

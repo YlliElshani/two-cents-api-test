@@ -1,4 +1,4 @@
-package com.yllielshani.twocentsdemo.presentation.posts
+package com.yllielshani.twocentsdemo.presentation.postlist
 
 import android.util.Log
 import androidx.compose.foundation.layout.Box
@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.yllielshani.twocentsdemo.data.model.PostDto
-import com.yllielshani.twocentsdemo.presentation.NavRoutes
+import com.yllielshani.twocentsdemo.presentation.navigation.NavRoutes
 import com.yllielshani.twocentsdemo.presentation.UiState
 
 @Composable

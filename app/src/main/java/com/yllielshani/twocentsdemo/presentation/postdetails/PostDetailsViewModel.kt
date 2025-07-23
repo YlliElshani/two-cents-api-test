@@ -1,4 +1,4 @@
-package com.yllielshani.twocentsdemo.presentation.detail
+package com.yllielshani.twocentsdemo.presentation.postdetails
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

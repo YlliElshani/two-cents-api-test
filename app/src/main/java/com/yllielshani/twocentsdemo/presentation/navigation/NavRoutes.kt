@@ -1,4 +1,4 @@
-package com.yllielshani.twocentsdemo.presentation
+package com.yllielshani.twocentsdemo.presentation.navigation
 
 
 sealed class NavRoutes(val route: String) {

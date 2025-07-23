@@ -1,4 +1,4 @@
-package com.yllielshani.twocentsdemo.presentation
+package com.yllielshani.twocentsdemo.presentation.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
@@ -6,9 +6,9 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.yllielshani.twocentsdemo.presentation.detail.AuthorPostsRoute
-import com.yllielshani.twocentsdemo.presentation.detail.PostDetailsRoute
-import com.yllielshani.twocentsdemo.presentation.posts.HomeRoute
+import com.yllielshani.twocentsdemo.presentation.postlist.AuthorPostsRoute
+import com.yllielshani.twocentsdemo.presentation.postdetails.PostDetailsRoute
+import com.yllielshani.twocentsdemo.presentation.postlist.HomeRoute
 
 @Composable
 fun AppNavGraph(navController: NavHostController) {

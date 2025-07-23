@@ -1,13 +1,11 @@
-package com.yllielshani.twocentsdemo.presentation.detail
+package com.yllielshani.twocentsdemo.presentation.postlist
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.yllielshani.twocentsdemo.presentation.NavRoutes
-import com.yllielshani.twocentsdemo.presentation.posts.HomeScreen
-import com.yllielshani.twocentsdemo.presentation.posts.HomeViewModel
+import com.yllielshani.twocentsdemo.presentation.navigation.NavRoutes
 
 @Composable
 fun AuthorPostsRoute(

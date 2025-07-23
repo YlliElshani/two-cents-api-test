@@ -1,4 +1,4 @@
-package com.yllielshani.twocentsdemo.presentation.detail
+package com.yllielshani.twocentsdemo.presentation.postdetails
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -38,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -47,10 +48,11 @@ import com.yllielshani.twocentsdemo.data.model.CommentNode
 import com.yllielshani.twocentsdemo.data.model.PollOption
 import com.yllielshani.twocentsdemo.data.model.PostDto
 import com.yllielshani.twocentsdemo.presentation.UiState
-import com.yllielshani.twocentsdemo.presentation.posts.IconTextRow
-import com.yllielshani.twocentsdemo.presentation.posts.UserInformation
-import com.yllielshani.twocentsdemo.presentation.posts.formatCurrency
-import com.yllielshani.twocentsdemo.presentation.posts.getSubscriptionType
+import com.yllielshani.twocentsdemo.presentation.common.components.ExpandableText
+import com.yllielshani.twocentsdemo.presentation.common.components.IconTextRow
+import com.yllielshani.twocentsdemo.presentation.common.components.UserInformation
+import com.yllielshani.twocentsdemo.presentation.common.components.getSubscriptionType
+import com.yllielshani.twocentsdemo.presentation.common.modifiers.formatCurrency
 import com.yllielshani.twocentsdemo.ui.theme.CardBackground
 import com.yllielshani.twocentsdemo.ui.theme.GoldenOrange
 
@@ -139,12 +141,12 @@ private fun PostDetailsContent(
                 .padding(bottom = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
+            ExpandableText(
                 text = post.title,
                 style = MaterialTheme.typography.headlineMedium,
                 maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                ignoreExpanded = true
             )
 
             Spacer(Modifier.width(12.dp))
@@ -355,16 +357,18 @@ fun PollResultsOptionsContent(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(
+                    ExpandableText(
                         opt.question,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = Color.White
+                        color = Color.White,
                     )
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
                             opt.votes.toString(),
                             style = MaterialTheme.typography.bodySmall,
-                            color = Color.White
+                            color = Color.White,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                         Spacer(Modifier.width(8.dp))
                         Box(
@@ -386,7 +390,9 @@ fun PollResultsOptionsContent(
                                 Text(
                                     formatCurrency(opt.averageBalance),
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = Color.White
+                                    color = Color.White,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
                             }
                         }

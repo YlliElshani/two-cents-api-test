@@ -1,4 +1,4 @@
-package com.yllielshani.twocentsdemo.presentation.posts
+package com.yllielshani.twocentsdemo.presentation.postlist
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

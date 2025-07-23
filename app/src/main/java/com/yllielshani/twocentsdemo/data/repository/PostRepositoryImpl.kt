@@ -21,7 +21,7 @@ class PostRepositoryImpl @Inject constructor(
                 put("filter", filter.value)
                 secretKey?.let { put("secret_key", it) }
             }
-            val request = JsonRpcRequest(id = "anon", method = "/v1/posts/arena", params = params)
+            val request = JsonRpcRequest(method = "/v1/posts/arena", params = params)
             runCatching {
                 val response = apiService.getAllPosts(request)
                 response.result?.posts ?: throw Throwable(response.error?.message.orEmpty())
@@ -35,7 +35,6 @@ class PostRepositoryImpl @Inject constructor(
     ): Result<List<PostDto>> = withContext(Dispatchers.IO) {
         val params = mapOf("user_uuid" to authorId)
         val request = JsonRpcRequest(
-            id = "anon",
             method = "/v1/users/get",
             params = params
         )
@@ -54,7 +53,7 @@ class PostRepositoryImpl @Inject constructor(
                 put("post_uuid", id)
                 secretKey?.let { put("secret_key", it) }
             }
-            val request = JsonRpcRequest(id = "anon", method = "/v1/posts/get", params = params)
+            val request = JsonRpcRequest(method = "/v1/posts/get", params = params)
             runCatching {
                 val response = apiService.getPostById(request)
                 val post = response.result?.postDetails
@@ -72,7 +71,7 @@ class PostRepositoryImpl @Inject constructor(
                 put("post_uuid", id)
                 secretKey?.let { put("secret_key", it) }
             }
-            val request = JsonRpcRequest(id = "anon", method = "/v1/polls/get", params = params)
+            val request = JsonRpcRequest(method = "/v1/polls/get", params = params)
             runCatching {
                 val response = apiService.getPollResults(request)
                 val post = response.result
@@ -90,7 +89,7 @@ class PostRepositoryImpl @Inject constructor(
                 put("post_uuid", id)
                 secretKey?.let { put("secret_key", it) }
             }
-            val request = JsonRpcRequest(id = "anon", method = "/v1/comments/get", params = params)
+            val request = JsonRpcRequest(method = "/v1/comments/get", params = params)
             runCatching {
                 val response = apiService.getPostComments(request)
                 val post = response.result

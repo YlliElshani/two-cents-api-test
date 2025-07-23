@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.yllielshani.twocentsdemo.R
 import com.yllielshani.twocentsdemo.data.enums.VoteState
+import com.yllielshani.twocentsdemo.data.model.CommentNode
 import com.yllielshani.twocentsdemo.data.model.PollOption
 import com.yllielshani.twocentsdemo.data.model.PostDto
 import com.yllielshani.twocentsdemo.presentation.UiState
@@ -62,15 +63,17 @@ fun PostDetailsRoute(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val pollOptions by viewModel.pollOptions.collectAsState()
+    val comments by viewModel.comments.collectAsState()
 
     LaunchedEffect(postId) { viewModel.loadPost(postId) }
 
     PostDetailsScreen(
         uiState = uiState,
         pollOptions = pollOptions,
+        comments = comments,
         onRetry = { viewModel.loadPost(postId) },
-        onPosterNetWorthClick,
-        onOptionsClick
+        onPosterNetWorthClick = onPosterNetWorthClick,
+        onOptionsClick = onOptionsClick
     )
 }
 
@@ -78,6 +81,7 @@ fun PostDetailsRoute(
 fun PostDetailsScreen(
     uiState: UiState<PostDto>,
     pollOptions: UiState<List<PollOption>>,
+    comments: UiState<List<CommentNode>>,
     onRetry: () -> Unit,
     onPosterNetWorthClick: (String) -> Unit,
     onOptionsClick: () -> Unit,
@@ -87,21 +91,18 @@ fun PostDetailsScreen(
         when (uiState) {
             UiState.Loading -> CircularProgressIndicator(Modifier.align(Alignment.Center))
             UiState.Empty -> Text("No post data", Modifier.align(Alignment.Center))
-            is UiState.Error -> ErrorState(
-                uiState.message,
-                onRetry,
-                Modifier.align(Alignment.Center)
-            )
-
+            is UiState.Error -> ErrorState(uiState.message, onRetry, Modifier.align(Alignment.Center))
             is UiState.Success -> PostDetailsContent(
                 post = uiState.data,
                 pollState = pollOptions,
+                commentsState = comments,
                 onPosterNetWorthClick = onPosterNetWorthClick,
                 onOptionsClick = onOptionsClick
             )
         }
     }
 }
+
 
 @Composable
 private fun ErrorState(
@@ -120,12 +121,12 @@ private fun ErrorState(
 private fun PostDetailsContent(
     post: PostDto,
     pollState: UiState<List<PollOption>>,
+    commentsState: UiState<List<CommentNode>>,
     onPosterNetWorthClick: (String) -> Unit,
     onOptionsClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val scrollState = rememberScrollState()
-
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -207,6 +208,7 @@ private fun PostDetailsContent(
         Divider()
         UserActionsBar()
         Divider()
+        CommentsSection(commentsState, onNetWorthClick = onPosterNetWorthClick)
     }
 }
 
@@ -395,4 +397,46 @@ fun PollResultsOptionsContent(
             Spacer(Modifier.height(8.dp))
         }
     }
+}
+
+@Composable
+fun CommentsSection(
+    state: UiState<List<CommentNode>>,
+    onNetWorthClick: (String) -> Unit
+) {
+    when (state) {
+        UiState.Loading -> CircularProgressIndicator()
+        is UiState.Error -> Text(state.message)
+        is UiState.Success -> state.data.forEach { CommentTree(it, 0, onNetWorthClick) }
+        else -> Unit
+    }
+}
+
+@Composable
+private fun CommentTree(
+    node: CommentNode,
+    depth: Int,
+    onNetWorthClick: (String) -> Unit
+) {
+    val indent = 12.dp * depth
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .padding(start = indent, top = 8.dp, bottom = 8.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            IconTextRow(
+                subscriptionTypeEnum = getSubscriptionType(node.comment.authorMeta.subscriptionType.toInt()),
+                amount = formatCurrency(node.comment.authorMeta.balance),
+                onClick = { onNetWorthClick(node.comment.authorUuid) }
+            )
+            Spacer(Modifier.width(8.dp))
+            UserInformation(poster = node.comment.authorMeta, postedAt = node.comment.createdAt)
+        }
+        Spacer(Modifier.height(4.dp))
+        Text(node.comment.text, style = MaterialTheme.typography.bodyMedium)
+        Spacer(Modifier.height(4.dp))
+        StatDisplay(R.drawable.ic_arrow_up, node.comment.upvoteCount, tint = GoldenOrange)
+    }
+    node.children.forEach { CommentTree(it, depth + 1, onNetWorthClick) }
 }

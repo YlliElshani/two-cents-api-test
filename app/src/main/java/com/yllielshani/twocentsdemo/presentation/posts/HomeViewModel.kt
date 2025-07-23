@@ -24,7 +24,7 @@ class HomeViewModel @Inject constructor(
     fun loadItems(filter: Filter = Filter.NewToday, secretKey: String? = null) {
         viewModelScope.launch {
             _uiState.value = UiState.Loading
-            repository.fetchItems(filter, secretKey)
+            repository.fetchPosts(filter, secretKey)
                 .fold(
                     onSuccess = { items ->
                         _uiState.value =

@@ -3,6 +3,7 @@ package com.yllielshani.twocentsdemo.data.repository
 import com.yllielshani.twocentsdemo.data.api.ApiService
 import com.yllielshani.twocentsdemo.data.api.JsonRpcRequest
 import com.yllielshani.twocentsdemo.data.enums.Filter
+import com.yllielshani.twocentsdemo.data.model.CommentsResponseWrapper
 import com.yllielshani.twocentsdemo.data.model.PollResultsWrapper
 import com.yllielshani.twocentsdemo.data.model.PostDto
 import kotlinx.coroutines.Dispatchers
@@ -14,7 +15,7 @@ import javax.inject.Singleton
 class PostRepositoryImpl @Inject constructor(
     private val apiService: ApiService
 ) : PostRepository {
-    override suspend fun fetchItems(filter: Filter, secretKey: String?): Result<List<PostDto>> =
+    override suspend fun fetchPosts(filter: Filter, secretKey: String?): Result<List<PostDto>> =
         withContext(Dispatchers.IO) {
             val params = buildMap<String, Any> {
                 put("filter", filter.value)
@@ -74,6 +75,24 @@ class PostRepositoryImpl @Inject constructor(
             val request = JsonRpcRequest(id = "anon", method = "/v1/polls/get", params = params)
             runCatching {
                 val response = apiService.getPollResults(request)
+                val post = response.result
+                    ?: throw Throwable("Post not found or response was malformed.")
+                post
+            }
+        }
+
+    override suspend fun fetchCommentsPerPost(
+        id: String,
+        secretKey: String?
+    ): Result<CommentsResponseWrapper>  =
+        withContext(Dispatchers.IO) {
+            val params = buildMap<String, Any> {
+                put("post_uuid", id)
+                secretKey?.let { put("secret_key", it) }
+            }
+            val request = JsonRpcRequest(id = "anon", method = "/v1/comments/get", params = params)
+            runCatching {
+                val response = apiService.getPostComments(request)
                 val post = response.result
                     ?: throw Throwable("Post not found or response was malformed.")
                 post

@@ -1,6 +1,7 @@
 package com.yllielshani.twocentsdemo.data.api
 
 import com.yllielshani.twocentsdemo.data.model.AuthorPostsDto
+import com.yllielshani.twocentsdemo.data.model.CommentsResponseWrapper
 import com.yllielshani.twocentsdemo.data.model.PollResultsWrapper
 import com.yllielshani.twocentsdemo.data.model.PostListWrapperDto
 import com.yllielshani.twocentsdemo.data.model.PostWrapperDto
@@ -25,4 +26,7 @@ interface ApiService {
 
     @POST("prod")
     suspend fun getPollResults(@Body request: JsonRpcRequest): JsonRpcResponse<PollResultsWrapper>
+
+    @POST("prod")
+    suspend fun getPostComments(@Body request: JsonRpcRequest): JsonRpcResponse<CommentsResponseWrapper>
 }

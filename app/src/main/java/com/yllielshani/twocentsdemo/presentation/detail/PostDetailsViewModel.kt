@@ -1,10 +1,10 @@
 package com.yllielshani.twocentsdemo.presentation.detail
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.yllielshani.twocentsdemo.data.model.CommentNode
+import com.yllielshani.twocentsdemo.data.model.CommentsDto
 import com.yllielshani.twocentsdemo.data.model.PollOption
-import com.yllielshani.twocentsdemo.data.model.PollResultsWrapper
 import com.yllielshani.twocentsdemo.data.model.PostDto
 import com.yllielshani.twocentsdemo.data.repository.PostRepository
 import com.yllielshani.twocentsdemo.presentation.UiState
@@ -24,11 +24,11 @@ class PostDetailsViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<UiState<PostDto>>(UiState.Loading)
     val uiState: StateFlow<UiState<PostDto>> = _uiState.asStateFlow()
 
-    private val _pollState = MutableStateFlow<UiState<PollResultsWrapper>>(UiState.Empty)
-    val pollState: StateFlow<UiState<PollResultsWrapper>> = _pollState.asStateFlow()
-
     private val _pollOptions = MutableStateFlow<UiState<List<PollOption>>>(UiState.Empty)
     val pollOptions = _pollOptions.asStateFlow()
+
+    private val _comments = MutableStateFlow<UiState<List<CommentNode>>>(UiState.Loading)
+    val comments: StateFlow<UiState<List<CommentNode>>> = _comments
 
     fun loadPost(postId: String) {
         viewModelScope.launch {
@@ -41,6 +41,7 @@ class PostDetailsViewModel @Inject constructor(
                             loadPollResults(postId, questions)
                         }
                     }
+                    loadComments(postId)
                 }
                 .onFailure {
                     _uiState.value = UiState.Error("Failed to load post")
@@ -64,5 +65,28 @@ class PostDetailsViewModel @Inject constructor(
                     _pollOptions.value = UiState.Error("Failed to load poll")
                 }
         }
+    }
+
+    private fun loadComments(postId: String) {
+        viewModelScope.launch {
+            _comments.value = UiState.Loading
+            repository.fetchCommentsPerPost(postId, "anon")
+                .onSuccess { list -> _comments.value = UiState.Success(list.comments.toNodeForest(postId)) }
+                .onFailure { _comments.value = UiState.Error("Failed to load comments") }
+        }
+    }
+
+    private fun List<CommentsDto>.toNodeForest(postId: String): List<CommentNode> {
+        val nodeMap = associate { it.uuid to CommentNode(it) }
+        val roots = mutableListOf<CommentNode>()
+        for (node in nodeMap.values) {
+            val parent = node.comment.replyParentUuid
+            if (parent == postId) {
+                roots += node
+            } else {
+                nodeMap[parent]?.children?.add(node)
+            }
+        }
+        return roots
     }
 }
